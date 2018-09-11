@@ -31,16 +31,11 @@
 // Online Sources:
 //
 /////////////////////////////// 80 COLUMNS WIDE ///////////////////////////////
-public class AuditableBankingTests {
-  
+public class AuditableBankingTests { 
   public static void main (String[] args) {
-    
     int allTransactions[][] = new int[100][3];
     int allTransactionsCount = 0;
     int newTransaction[] = new int[] {1,0,1};
-
-    AuditableBanking.submitTransactions(newTransaction, allTransactions, allTransactionsCount);
-    
-  }
-   
+    AuditableBanking.submitTransactions(newTransaction, allTransactions, allTransactionsCount);   
+  }   
 }
