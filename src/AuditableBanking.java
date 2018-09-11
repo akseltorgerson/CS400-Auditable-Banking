@@ -46,20 +46,13 @@ public class AuditableBanking {
  * @return the number of transaction groups within allTransactions after newTransactions is added.
  */
   public static int submitTransactions(int[] newTransactions, int[][] allTransactions, 
-      int allTransactionsCount) {
-            
+      int allTransactionsCount) {        
+    
     for (int i = 0; i < newTransactions.length; i++) {
       allTransactions[allTransactionsCount][i] = newTransactions[i];
     }
     
     allTransactionsCount += 1;
-    
-    System.out.println(allTransactionsCount);
-    System.out.println(Arrays.toString(newTransactions));
-    System.out.println(Arrays.toString(allTransactions[allTransactionsCount-1]));
-    
-    
-    
     
     return allTransactionsCount;
   }
