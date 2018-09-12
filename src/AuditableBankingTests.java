@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 //////////////////// ALL ASSIGNMENTS INCLUDE THIS SECTION /////////////////////
 //
 // Title: P01 Auditable Banking
@@ -12,7 +14,7 @@
 //
 // Partner Name: Jacob Mayl
 // Partner Email: mayl@wisc.edu
-// Partner Lecturer's Name: Gary Dahl
+// Partner Lecturer's Name: Mouna Kacem
 //
 // VERIFY THE FOLLOWING BY PLACING AN X NEXT TO EACH TRUE STATEMENT:
 // _X_ Write-up states that pair programming is allowed for this assignment.
@@ -33,9 +35,26 @@
 /////////////////////////////// 80 COLUMNS WIDE ///////////////////////////////
 public class AuditableBankingTests { 
   public static void main (String[] args) {
-    int allTransactions[][] = new int[100][3];
+    int allTransactions[][] = new int[150][150];
     int allTransactionsCount = 0;
-    int newTransaction[] = new int[] {1,0,1};
-    AuditableBanking.submitTransactions(newTransaction, allTransactions, allTransactionsCount);   
+    
+    String trans1 = "0 1 0 1 1";
+    String trans2 = "2 1 0 4 5";
+    String trans3 = "1 -44 545 1 -6";
+    String trans4 = "0 0 1 1 1";
+    
+    allTransactionsCount = AuditableBanking.processCommand(trans1, allTransactions, allTransactionsCount);
+    allTransactionsCount = AuditableBanking.processCommand(trans2, allTransactions, allTransactionsCount);
+    allTransactionsCount = AuditableBanking.processCommand(trans3, allTransactions, allTransactionsCount);
+    allTransactionsCount = AuditableBanking.processCommand(trans4, allTransactions, allTransactionsCount);
+    
+    for (int i = 0; i < allTransactionsCount; i++) {
+      System.out.print("Transaction #" + (i+1) + ": ");
+      for (int j = 0; j < 5; j++) {        
+        System.out.print(allTransactions[i][j] + " ");
+      }
+      System.out.println();
+    }
+    System.out.print("Number of transactions: " +allTransactionsCount);
   }   
 }
