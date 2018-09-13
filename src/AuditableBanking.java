@@ -47,23 +47,106 @@ public class AuditableBanking {
    */
   public static int submitTransactions(int[] newTransactions, int[][] allTransactions,
       int allTransactionsCount) {
-    for (int i = 0; i < newTransactions.length; i++) { // loops through every transaction in the new transaction array
-      allTransactions[allTransactionsCount][i] = newTransactions[i]; // adds the new transaction array index by index to the all transaction array at the next index
+    for (int i = 0; i < newTransactions.length; i++) { // loops through every transaction in the new
+                                                       // transaction array
+      allTransactions[allTransactionsCount][i] = newTransactions[i]; // adds the new transaction
+                                                                     // array index by index to the
+                                                                     // all transaction array at the
+                                                                     // next index
     }
     allTransactionsCount += 1; // increases the transaction count after it has completed
     return allTransactionsCount; // returns the transaction count
   }
 
-  public static int processCommand(String command, int[][] allTransactions, int allTransactionsCount) {
-      String [] stringCommandArray = command.split(" "); //splits String command into an array where each element is a string
-      int [] commandArray = new int[stringCommandArray.length]; //creates empty array of type int[] with same length as stringCommandArrray
-      
-      for(int i = 0; i<stringCommandArray.length; i++){
-        commandArray[i]= Integer.parseInt(stringCommandArray[i]); // copies the String of stringCommandArray into an identical int in commandArray
+  public static int processCommand(String command, int[][] allTransactions,
+      int allTransactionsCount) {
+    String[] stringCommandArray = command.split(" "); // splits String command into an array where
+                                                      // each element is a string
+    int[] commandArray = new int[stringCommandArray.length]; // creates empty array of type int[]
+                                                             // with same length as
+                                                             // stringCommandArrray
+
+    for (int i = 0; i < stringCommandArray.length; i++) {
+      commandArray[i] = Integer.parseInt(stringCommandArray[i]); // copies the String of
+                                                                 // stringCommandArray into an
+                                                                 // identical int in commandArray
+    }
+    if (commandArray[0] == 0 || commandArray[0] == 1 || commandArray[0] == 2) { // if the first
+                                                                                // number is valid,
+                                                                                // submit
+                                                                                // transaction.
+      allTransactionsCount =
+          submitTransactions(commandArray, allTransactions, allTransactionsCount);
+    }
+    return allTransactionsCount; // return updated transaction count
+  }
+
+  public static int calculateNumberOfOverdrafts(int[][] allTransactions, int allTransactionsCount) {
+    int overdrafts = 0;
+    int accountBalance = 0; // account balance and overdrafts start at 0 since there is no prior
+                            // transactions
+    for (int i = 0; i < allTransactionsCount; i++) {
+      if (allTransactions[i][0] == 0) {
+        for (int j = 1; j < allTransactions[i].length; j++) {
+          if (allTransactions[i][j] == 0 && accountBalance <= 0) {
+            overdrafts++;
+            accountBalance--;
+          } else {
+            accountBalance++;
+          }
+        }
+      } else if (allTransactions[i][0] == 1) {
+        for (int j = 1; j < allTransactions[i].length; j++) {
+          accountBalance += allTransactions[i][j];
+          if (accountBalance < 0 && allTransactions[i][j] < 0) {
+            overdrafts++;
+          }
+        }
+      } else if (allTransactions[i][0] == 2) {
+        int[] multipliers = {20, 40, 80, 100};
+        for (int j = 1; j < allTransactions[i].length; j++) {
+          accountBalance -= (allTransactions[i][j] * multipliers[j - 1]);
+          if (accountBalance < 0) {
+            overdrafts++;
+          }
+        }
       }
-      if(commandArray[0] == 0 || commandArray[0] == 1 || commandArray[0] == 2 ) { //if the first number is valid, submit transaction.
-        allTransactionsCount = submitTransactions(commandArray, allTransactions, allTransactionsCount);
+    }
+    return overdrafts;
+  }
+
+  public static int calculateCurrentBalance(int[][] allTransactions, int allTransactionsCount) {
+    int firstNum;
+    int totalBalance = 0;
+    for (int i = 0; i < allTransactionsCount; i++) {
+      firstNum = allTransactions[i][0];
+      switch (firstNum) {
+        case 0: // if it is a binary transaction:
+          for (int j = 1; j < allTransactions[i].length; j++) { // for each number after index 0 in the array...
+            if (allTransactions[i][j] == 1) // if the int =1, increment total balance by 1
+            {
+              totalBalance++;
+            }
+            if (allTransactions[i][j] == 0) // if the int = 0, decrement total balance by 1
+            {
+              totalBalance--;
+            }
+          }
+          break;
+      case 1: // if it is an Integer transaction
+        for (int j = 1; j < allTransactions[i].length; j++) // for each number after index 0 in the array...
+        {
+          totalBalance = totalBalance + allTransactions[i][j]; // add the int to the total balance.
+        }
+        break;
+      case 2: // if it is a Quick Draw transaction
+        totalBalance = totalBalance - 20*allTransactions[i][1]; //adds $20 for each time that withdraw was made. (value at index1)
+        totalBalance = totalBalance - 40*allTransactions[i][2]; //adds $40 for each time that withdraw was made. (value at index2)
+        totalBalance = totalBalance - 80*allTransactions[i][3]; //adds $80 for each time that withdraw was made. (value at index3)
+        totalBalance = totalBalance - 100*allTransactions[i][4]; //adds $100 for each time that withdraw was made. (value at index4)
+      break;
       }
-      return allTransactionsCount; //return updated transaction count
+    }
+    return totalBalance;
   }
 }
