@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.Scanner;
 
 //////////////////// ALL ASSIGNMENTS INCLUDE THIS SECTION /////////////////////
 //
@@ -43,78 +44,92 @@ public class AuditableBanking {
    * @param allTransactions is the collection that newTransactions is being added to (oversize).
    * @param allTransactionsCount is the number of transaction groups within allTransactions (before
    *        newTransactions is added.
+   *        
    * @return the number of transaction groups within allTransactions after newTransactions is added.
    */
-  public static int submitTransactions(int[] newTransactions, int[][] allTransactions,
-      int allTransactionsCount) {
-    for (int i = 0; i < newTransactions.length; i++) { // loops through every transaction in the new
-                                                       // transaction array
-      allTransactions[allTransactionsCount][i] = newTransactions[i]; // adds the new transaction
-                                                                     // array index by index to the
-                                                                     // all transaction array at the
-                                                                     // next index
+  public static int submitTransactions(int[] newTransactions, int[][] allTransactions, int allTransactionsCount) {
+    for (int i = 0; i < newTransactions.length; i++) { // loops through every transaction in the new transaction array
+      allTransactions[allTransactionsCount][i] = newTransactions[i]; // adds the new transaction array index by index to the all transaction array at the next index
+    }
+    if (allTransactions[allTransactionsCount][0] == 0) {
+    	for (int j = newTransactions.length; j < allTransactions[allTransactionsCount].length; j++) {
+    		allTransactions[allTransactionsCount][j] = 3;
+    	}
     }
     allTransactionsCount += 1; // increases the transaction count after it has completed
     return allTransactionsCount; // returns the transaction count
   }
-
-  public static int processCommand(String command, int[][] allTransactions,
-      int allTransactionsCount) {
+  /**
+   * Processes a string that the user supplies, returns an integer that is a running count of how many 
+   * commands have been entered.
+   * 
+   * @param command is the string representation of the transaction a user wants to add
+   * @param allTransactions is the 2d array holding the lists (array) of transactions
+   * @param allTransactionsCount is the running total of all the transactions that have been added
+   *        newTransactions is added.
+   *        
+   * @return the number of transaction groups within allTransactions after newTransactions is added.
+   */
+  public static int processCommand(String command, int[][] allTransactions, int allTransactionsCount) {
     String[] stringCommandArray = command.split(" "); // splits String command into an array where
                                                       // each element is a string
-    int[] commandArray = new int[stringCommandArray.length]; // creates empty array of type int[]
-                                                             // with same length as
-                                                             // stringCommandArrray
+    int[] commandArray = new int[stringCommandArray.length]; // creates empty array of type int[]with same length as stringCommandArrray
 
     for (int i = 0; i < stringCommandArray.length; i++) {
-      commandArray[i] = Integer.parseInt(stringCommandArray[i]); // copies the String of
-                                                                 // stringCommandArray into an
-                                                                 // identical int in commandArray
+      commandArray[i] = Integer.parseInt(stringCommandArray[i]); // copies the String of stringCommandArray into an identical int in commandArray
     }
-    if (commandArray[0] == 0 || commandArray[0] == 1 || commandArray[0] == 2) { // if the first
-                                                                                // number is valid,
-                                                                                // submit
-                                                                                // transaction.
-      allTransactionsCount =
-          submitTransactions(commandArray, allTransactions, allTransactionsCount);
+    
+    if (commandArray[0] == 0 || commandArray[0] == 1 || commandArray[0] == 2) { // if the first number is valid, submit transaction.
+      allTransactionsCount = submitTransactions(commandArray, allTransactions, allTransactionsCount);
     }
     return allTransactionsCount; // return updated transaction count
   }
-
+  /**
+   * Calculates the number of overdrafts that the current group of transactions have had so far
+   * 
+   * @param allTransactions is the 2d array holding the arrays of transactions
+   * @param allTransactionsCount is the running total of all the transactions that have happened so far
+   * 
+   * @return the number of overdrafts at the current number of transactions
+   */
   public static int calculateNumberOfOverdrafts(int[][] allTransactions, int allTransactionsCount) {
     int overdrafts = 0;
-    int accountBalance = 0; // account balance and overdrafts start at 0 since there is no prior
-                            // transactions
     for (int i = 0; i < allTransactionsCount; i++) {
-      if (allTransactions[i][0] == 0) {
-        for (int j = 1; j < allTransactions[i].length; j++) {
-          if (allTransactions[i][j] == 0 && accountBalance <= 0) {
-            overdrafts++;
-            accountBalance--;
-          } else {
-            accountBalance++;
-          }
-        }
-      } else if (allTransactions[i][0] == 1) {
-        for (int j = 1; j < allTransactions[i].length; j++) {
-          accountBalance += allTransactions[i][j];
-          if (accountBalance < 0 && allTransactions[i][j] < 0) {
-            overdrafts++;
-          }
-        }
-      } else if (allTransactions[i][0] == 2) {
-        int[] multipliers = {20, 40, 80, 100};
-        for (int j = 1; j < allTransactions[i].length; j++) {
-          accountBalance -= (allTransactions[i][j] * multipliers[j - 1]);
-          if (accountBalance < 0) {
-            overdrafts++;
-          }
-        }
-      }
+      switch(allTransactions[i][0]) {
+      case 0:
+    	  for (int j = 1; j < allTransactions[i].length; j++) {
+    		  if (allTransactions[i][j] == 0 && calculateCurrentBalance(allTransactions, i+1) < 0) {
+    			  overdrafts++;
+    		  }
+    	  }
+    	  break;
+      case 1:
+    	  for (int j = 1; j < allTransactions[i].length; j++) {
+    		  if (allTransactions[i][j] < 0 && calculateCurrentBalance(allTransactions, i+1) < 0) {
+    			  overdrafts++;
+    		  }
+    	  }
+    	  break;
+      case 2:
+    	  for (int j = 1; j < 4; j++) {
+    		  if (calculateCurrentBalance(allTransactions, i+1) < 0) {
+    			  overdrafts++;
+    		  }
+    	  }
+    	  break;
+      }    		
     }
     return overdrafts;
   }
-
+  /**
+   * Calculates the current account balance
+   * 
+   * @param allTransactions is the 2d array holding the lists (array) of transactions
+   * @param allTransactionsCount is the running total of all the transactions that have been added 
+   * 		newTransactions is added.
+   * 
+   * @return the total account balance.
+   */
   public static int calculateCurrentBalance(int[][] allTransactions, int allTransactionsCount) {
     int firstNum;
     int totalBalance = 0;
@@ -149,4 +164,41 @@ public class AuditableBanking {
     }
     return totalBalance;
   }
+  
+  public static void main(String[] args){
+	  System.out.println("========== Welcome to the Auditable Banking App ==========");
+	  int [][]allTransactions = new int [150][150];
+	  int allTransactionsCount = 0;
+	  boolean done = false;
+	  int balance = 0;
+	  int overdrafts = 0;
+	  Scanner scnr = new Scanner(System.in);
+	  String userInput;
+	  while(!done)
+	  {
+		  System.out.println("COMMAND MENU:");
+		  System.out.println("Submit a Transaction (enter sequence of integers separated by spaces)");
+		  System.out.println("Show Current [B]alance Show \nNumber of [O]verdrafts \n[Q]uit Program");
+		  System.out.println("ENTER COMMAND:");
+		  userInput = scnr.nextLine().toLowerCase();
+		  switch(userInput)
+		  {
+		  case "q":
+			  done = true;
+			  System.out.println("============ Thank you for using this App!!!! ============");
+			  break;
+		  case "b":
+			  balance = calculateCurrentBalance(allTransactions, allTransactionsCount);
+			  System.out.println("Current Balance: " + balance);
+			  break;
+		  case "o":
+			  overdrafts = calculateNumberOfOverdrafts(allTransactions, allTransactionsCount);
+			  System.out.println("Number Of Overdrafts: " + overdrafts);
+			  break;
+		  default:
+			  allTransactionsCount = processCommand(userInput, allTransactions, allTransactionsCount);
+			  break;
+		  }
+	  }
+  	}
 }
